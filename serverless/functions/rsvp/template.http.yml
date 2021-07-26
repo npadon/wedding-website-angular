@@ -1,0 +1,21 @@
+# Lambda to rsvp
+rsvpWriteLambda:
+  name: ${self:service}-post-rsvp-lambda-${self:provider.stage}
+  handler: functions/rsvp/handler.post
+  timeout: 10 # seconds
+  events:
+   - http:
+       path: v1/rspv
+       method: post
+       cors: true
+
+
+rsvpReadLambda:
+  name: ${self:service}-get-rsvp-lambda-${self:provider.stage}
+  handler: functions/rsvp/handler.get
+  timeout: 10 # seconds
+  events:
+   - http:
+       path: v1/rspv
+       method: get
+       cors: true
