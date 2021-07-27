@@ -3,10 +3,14 @@ import os
 from typing import Dict
 
 import boto3
+import humps
 
+ENV = os.getenv('ENV','local')
+SERVICE = os.getenv('SERVICE','wedding-website-angular')
+TARGET_BUCKET = f'{SERVICE}-rsvp-bucket-s3-{ENV}'
 
-TARGET_BUCKET = 'wedding-website-angular-rsvp-bucket-s3-dev'
 IS_DEPLOYED = False
+
 DEFAULT_LAMBDA_RESPONSE = {
     'isBase64Encoded': False,
     'statusCode': 200,
@@ -19,7 +23,7 @@ DEFAULT_LAMBDA_RESPONSE = {
 }
 
 # Leverage built-in sls offline env var (this could change)
-if os.getenv('IS_OFFLINE') != 'true':
+if os.getenv('IS_DEPLOYED') == 'true':
     IS_DEPLOYED = True
 
 if IS_DEPLOYED:
@@ -46,8 +50,7 @@ def get(event, context) -> Dict:
 
 def post(event, context) -> Dict:
     # just write the key to s3
-    payload = json.loads(event['body'])
-
+    payload = humps.decamelize(json.loads(event['body']))
     first_name = payload['first_name']
     last_name = payload['last_name']
     email = payload['email']

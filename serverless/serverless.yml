@@ -16,7 +16,7 @@ package: # Optional deployment packaging configuration
 provider:
   name: aws
   runtime: python3.8
-  stage: dev # Default stage to be used. Default is "dev"
+  stage: ${opt:stage, 'local'} # Default stage to be used. Default is "local"
   region: us-east-1 # Default region to be used. Default is "us-east-1"
   stackName: ${self:service}-stack # Use a custom name for the CloudFormation stack
   memorySize: 128
@@ -26,6 +26,12 @@ provider:
     service: ${self:service}
     author: Nick Padon
     stage: ${self:provider.stage}
+  iam:
+    role: LambdaBaseRole
+  environment:
+    IS_DEPLOYED: ${self:custom.${self:provider.stage}.isDeployed,'false'}
+    ENV: ${self:provider.stage}
+    SERVICE: ${self:service}
   deploymentBucket:
     blockPublicAccess: true # Prevents public access via ACLs or bucket policies. Default is false
   apiName: ${self:service}-${self:provider.stage}
@@ -57,6 +63,12 @@ resources:
   - ${file(resources/s3.yml)}
 
 custom:
+  # deployment status
+  dev:
+    isDeployed: true
+  local:
+    isDeployed: false
+
   # serverless-python-requirements plugin
   pythonRequirements:
     # Set the below to 'non-linux' for Docker packaging, which supports building native
@@ -75,5 +87,6 @@ custom:
     directory: /tmp
 
 plugins:
+  - serverless-python-requirements
   - serverless-s3-local
   - serverless-offline

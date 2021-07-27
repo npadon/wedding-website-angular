@@ -53,7 +53,7 @@ Resources:
   LambdaBaseRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: lambda-base-role
+      RoleName: ${self:service}-lambda-base-role
       Description: Provides common Lambda function permissions necessary for accessing resources during execution.
       AssumeRolePolicyDocument:
         Version: '2012-10-17'

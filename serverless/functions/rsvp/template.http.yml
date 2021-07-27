@@ -5,7 +5,7 @@ rsvpWriteLambda:
   timeout: 10 # seconds
   events:
    - http:
-       path: v1/rspv
+       path: v1/rsvp
        method: post
        cors: true
 
@@ -16,6 +16,6 @@ rsvpReadLambda:
   timeout: 10 # seconds
   events:
    - http:
-       path: v1/rspv
+       path: v1/rsvp
        method: get
        cors: true

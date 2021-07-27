@@ -1,15 +1,16 @@
 import requests
 import json
+import os
 
 def main():
-    url = 'http://localhost:3000/dev/v1/rspv'
+    url = 'http://localhost:3000/local/v1/rsvp'
     
     payload = {
-        'first_name':'Nick',
-        'last_name':'Padon',
+        'firstName':'Nick',
+        'lastName':'Padon',
         'email':'npadon@gmail.com',
         'attending':'yes',
-        'number_attending':4
+        'numberAttending':5
         }
     
     requests.post(url,json=payload)
