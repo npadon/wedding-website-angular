@@ -45,7 +45,36 @@
     </div> -->
     <div class="row">
       <div class="col d-flex align-items-center justify-content-center mb-3">
-        <span>Attending: </span>
+        <div class="form-check mx-3">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="attending"
+            formControlName="attending"
+            id="flexRadioDefault1"
+            value="Yes"
+            required
+          />
+          <label class="form-check-label" for="flexRadioDefault1">
+            Yes, I'm attending
+          </label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="attending"
+            formControlName="attending"
+            id="flexRadioDefault2"
+            value="No"
+            checked
+            required
+          />
+          <label class="form-check-label" for="flexRadioDefault2">
+            No, I can't make it
+          </label>
+        </div>
+        <!-- <span>Attending: </span>
         <input
           type="radio"
           class="btn-check"
@@ -75,7 +104,7 @@
         />
         <label class="btn btn-danger mx-4" style="width: 8rem" for="attendingNo"
           >No</label
-        >
+        > -->
       </div>
       <div class="col">
         <div class="form-floating mb-3">
@@ -95,6 +124,6 @@
       Submit
     </button>
   </form>
-  <br>
+  <br />
   <span>{{ message }}</span>
 </div>

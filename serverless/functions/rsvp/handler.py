@@ -1,26 +1,18 @@
 import json
 import os
+import uuid
 from typing import Dict
-
+from datetime import datetime
 import boto3
 import humps
 
-ENV = os.getenv('ENV','local')
-SERVICE = os.getenv('SERVICE','wedding-website-angular')
+from functions.common.http_ import http_event_handler
+
+ENV = os.getenv('ENV', 'local')
+SERVICE = os.getenv('SERVICE', 'wedding-website-angular')
 TARGET_BUCKET = f'{SERVICE}-rsvp-bucket-s3-{ENV}'
 
 IS_DEPLOYED = False
-
-DEFAULT_LAMBDA_RESPONSE = {
-    'isBase64Encoded': False,
-    'statusCode': 200,
-    'headers': {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': True
-    },
-    'body': 'default response'
-}
 
 # Leverage built-in sls offline env var (this could change)
 if os.getenv('IS_DEPLOYED') == 'true':
@@ -36,29 +28,20 @@ else:
                       aws_secret_access_key='S3RVER')
 
 
+@http_event_handler
 def get(event, context) -> Dict:
     results = s3.list_objects(Bucket=TARGET_BUCKET, MaxKeys=1000)
     print(results)
     key_objects = results['Contents']
     parsed = [item['Key'] for item in key_objects]
-    
-    response = DEFAULT_LAMBDA_RESPONSE.copy()
-    response['body'] = json.dumps(parsed, default=lambda o: o.__str__())
-    print(response)
-    return response
+    return {'data': parsed}
 
 
+@http_event_handler
 def post(event, context) -> Dict:
     # just write the key to s3
     payload = humps.decamelize(json.loads(event['body']))
-    first_name = payload['first_name']
-    last_name = payload['last_name']
-    email = payload['email']
-    attending = payload['attending']
-    number_attending = payload['number_attending']
-
-    key = f'rsvp/{first_name}-{last_name}-{email}-{attending}-{number_attending}'
-    print(key)
-    s3.put_object(Bucket=TARGET_BUCKET, Key=key, Body=b'')
-
-    return {'message': 'success'}
+    payload['effective_at'] = str(datetime.now())
+    key = f'rsvp/{uuid.uuid4()}.json'
+    s3.put_object(Bucket=TARGET_BUCKET, Key=key, Body=json.dumps(payload).encode('utf-8'))
+    return {'data': 'success'}
