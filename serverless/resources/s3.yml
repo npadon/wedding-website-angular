@@ -1,0 +1,5 @@
+Resources:
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:service}-rsvp-bucket-s3-${self:provider.stage}

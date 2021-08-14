@@ -1,0 +1,92 @@
+service: wedding-website-angular
+projectDir: ./ # Boundary of a project in which service is configured. Influences file resolution
+frameworkVersion: "2"
+configValidationMode: error # Modes for config validation. `error` throws an exception, `warn` logs error to console, `off` disables validation at all. The default is warn.
+useDotenv: true # If set to 'true', environment variables will be automatically loaded from .env files
+variablesResolutionMode: "20210326" # To crash on variable resolution errors (as coming from new resolver), set this value to "20210326"
+package: # Optional deployment packaging configuration
+  patterns: # Specify the directories and files which should be included in the deployment package
+    - "!.idea/**"
+    - "!node_modules/**"
+    - "!venv/**"
+    - "!./functions/**/node_modules/**" # Will include as necessary in individual function packages
+    - "!tests/**"
+    - "!dev-utils/**"
+    - "!*-pkg/**/*" # Any previously built services
+provider:
+  name: aws
+  runtime: python3.8
+  stage: ${opt:stage, 'local'} # Default stage to be used. Default is "local"
+  region: us-east-1 # Default region to be used. Default is "us-east-1"
+  stackName: ${self:service}-stack # Use a custom name for the CloudFormation stack
+  memorySize: 128
+  timeout: 10
+  logRetentionInDays: 14
+  tags: # Tags that will be added to each of the deployment resources
+    service: ${self:service}
+    author: Nick Padon
+    stage: ${self:provider.stage}
+  iam:
+    role: LambdaBaseRole
+  environment:
+    IS_DEPLOYED: ${self:custom.${self:provider.stage}.isDeployed,'false'}
+    ENV: ${self:provider.stage}
+    SERVICE: ${self:service}
+  deploymentBucket:
+    blockPublicAccess: true # Prevents public access via ACLs or bucket policies. Default is false
+  apiName: ${self:service}-${self:provider.stage}
+  endpointType: EDGE
+  apiGateway:
+    shouldStartNameWithService: true # Prepping for change with upcoming version
+    # Attach to all API Gateway rest endpoints.
+    resourcePolicy:
+      - Effect: Allow
+        Principal: "*"
+        Action: execute-api:Invoke
+        Resource:
+          - execute-api:/*/*/*
+    usagePlan: # Optional usage plan configuration
+      quota:
+        limit: 5000
+        offset: 2
+        period: MONTH
+
+  lambdaHashingVersion: "20201221"
+  layers:
+    - !Ref PythonRequirementsLambdaLayer
+
+functions:
+  - ${file(functions/rsvp/template.http.yml)}
+
+resources:
+  - ${file(resources/iam-roles.yml)}
+  - ${file(resources/s3.yml)}
+
+custom:
+  # deployment status
+  dev:
+    isDeployed: true
+  local:
+    isDeployed: false
+
+  # serverless-python-requirements plugin
+  pythonRequirements:
+    # Set the below to 'non-linux' for Docker packaging, which supports building native
+    # packages such as psycopg2, numpy, etc.
+
+    dockerizePip: false
+    layer:
+      name: ${self:service}-libraries-lambda-layer-${self:provider.stage}
+      description: Python requirements lambda layer
+      compatibleRuntimes:
+        - python3.8
+      retain: false # optional, false by default. If true, layer versions are not deleted as new ones are created
+
+  s3:
+    host: localhost
+    directory: /tmp
+
+plugins:
+  - serverless-python-requirements
+  - serverless-s3-local
+  - serverless-offline

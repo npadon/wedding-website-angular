@@ -1,0 +1,68 @@
+Resources:
+  # Policy for archive bucket managed by serverless lambda
+  # DataBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket: !Ref S3BucketDataBucket  # bucket managed by serverless
+  #     PolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+
+  LambdaBasePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub ${self:service}-lambda-base-policy-${self:provider.stage}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - iam:GetRole
+            Resource: !Sub arn:aws:iam::722958364712:role/${self:service}-*-${self:provider.stage}
+          - Effect: Allow
+            Action:
+              - lambda:GetFunctionConfiguration
+              - lambda:GetFunction
+              - lambda:InvokeFunction
+              # Events on said functions
+              - lambda:GetEventSourceMapping
+            Resource:
+              - !Sub arn:aws:lambda:${self:provider.region}:722958364712:function:${self:service}-*-${self:provider.stage}
+          - Effect: Allow
+            Action:
+              - ec2:DescribeSecurityGroups
+            Resource: '*'
+          - Sid: WriteToCloudWatchLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+          - Sid: ListObjectsInThisAppsBucketsAcrossStageAccounts
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::${self:service}-*
+          - Sid: AllObjectActionsInThisAppsBucketsAcrossStageAccounts
+            Effect: Allow
+            Action:
+              - s3:*Object
+              - s3:*ObjectAcl
+            Resource: arn:aws:s3:::${self:service}-*/*
+
+  LambdaBaseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ${self:service}-lambda-base-role
+      Description: Provides common Lambda function permissions necessary for accessing resources during execution.
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref LambdaBasePolicy

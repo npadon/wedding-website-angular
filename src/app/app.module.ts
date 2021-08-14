@@ -8,6 +8,10 @@ import { RsvpComponent } from './rsvp/rsvp.component';
 import { HomeComponent } from './home/home.component';
 import { TravelComponent } from './travel/travel.component';
 import { RegistryComponent } from './registry/registry.component';
+import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RsvpFormComponent } from './rsvp-form/rsvp-form.component';
+import { ContactComponent } from './contact/contact.component';
 
 @NgModule({
   declarations: [
@@ -16,11 +20,15 @@ import { RegistryComponent } from './registry/registry.component';
     RsvpComponent,
     HomeComponent,
     TravelComponent,
-    RegistryComponent
+    RegistryComponent,
+    RsvpFormComponent,
+    ContactComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
