@@ -1,7 +1,26 @@
-<div class="container-fluid">
-  <h2 class="text-center my-4">Nick & Emily</h2>
-</div>
-<app-app-nav></app-app-nav>
-<div class="container-fluid text-center mt-5">
-  <router-outlet></router-outlet>
-</div>
+<main class="flex-shrink-1">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-3">
+        <img src="assets/Banner1.png" class="img-fluid" />
+      </div>
+      <div class="col-6">
+        <img src="assets/nickandemily.png" class="img-fluid" />
+      </div>
+      <div class="col-3">
+        <img src="assets/Banner2.png" class="img-fluid" />
+      </div>
+    </div>
+  </div>
+  <app-app-nav></app-app-nav>
+  <div class="container-fluid text-center mt-5 mb-1">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+<footer class="footer emily-nav-bar-color mt-auto py-1">
+  <div class="container text-end">
+    <span class="text-light small">
+      We made this. Copyright Emily and Nick forever.
+    </span>
+  </div>
+</footer>
